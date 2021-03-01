@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+<head>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+</head>
+<style>
+  body {
+    font-weight: bold;
+    font-size: 20px;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    background-color: black;
+  }
+  #header {
+    font-size: 44px;
+    color: white;
+    background-color: black;
+    text-align: center;
+    padding-top: 0.6em;
+    padding-bottom: 0.4em;
+  }
+  #queries {
+    padding-left: 0.8em;
+    padding-bottom: 0.5em;
+    background-color: rgba(204, 232, 227,1);
+    color: black;
+  }
+  #dbhtext {
+    padding-top: 0.4em;
+    padding-left: 0.2em;
+  }
+  #results {
+    padding-top: 0.4em;
+    padding-left: 0.4em;
+    padding-right: 0.4em;
+    color: (204, 232, 227,1);
+  }
+  select {
+    width: 20vw;
+    min-width: 20vw;
+    height: 3em;
+    cursor: pointer;
+    background-color: rgba(38, 189, 136,1);
+    border: none;
+    box-shadow: 0 1.5px 1.5px 0 rgba(0,0,0,0.1), 0 1.5px 3px 0 rgba(0,0,0,0.1);
+    border-radius: 8px;
+    color: white;
+    padding: 10px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    display: inline-block;
+  }
+  select:hover, select:focus {
+    color: rgba(38, 189, 136,1);
+    background-color: white;
+  }
+  #submit {
+    box-shadow: 0 5px 5px 0 rgba(0,0,0,0.15), 0 5px 10px 0 rgba(0,0,0,0.15);
+    transition: 0.3s;
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
+  .btn-outline-dark {
+    background-color: rgba(250,253,248,1);
+  }
+  #time {
+    margin-left: 0.2 em;
+  }
+</style>
+
+<body>
+  <div id="header">
+    Query Redshift and RDS
+  </div>
+  <br>
+  <div id="queries">
+    <a id="dbhtext">Select database to query:</a><br>
+    <select id="tabDrop" onchange='queries.updateIndex()'>
+      <option value="0" class="tabOp">Redshift</option>
+      <option value="1" class="tabOp">RDS</option>
+    </select>
+    <br>
+    <br>
+    <b-form-textarea id="txtarea" v-model="query" rows="3" placeholder="Enter SQL Query"></b-form-textarea>
+    <br>
+    <button type="submit" value="Submit" id="submit" class="btn btn-outline-dark" v-on:click='performQuery'>Submit</button>
+    <b id="time" v-show="display"> Query Time: {{ time }} ms </b>
+    <br>
+  </div>
+  <div id="results" v-show="display">
+    <b-table striped borderless hover dark sticky-header="1000px" id="table" :items="items" :fields="fields">
+    </b-table>
+  </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-vue/2.21.2/bootstrap-vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
+<script>
+  var queries = new Vue({ //controls form input
+    el: '#queries',
+    data: {
+      index: 0, //0 redshift, 1 rds
+      query: "",
+      time: 0,
+      display: false
+    },
+    methods: {
+      updateIndex: function() { //keeps track of which database to query
+        this.index = document.getElementById("tabDrop").selectedIndex;
+      },
+      performQuery: function() {
+        document.getElementById("submit").disabled = true; //stop queries from happening
+        results.clear()
+        this.display = false;
+        var server = "";
+        if(this.index == 0) {
+          server = "redshift";
+        } else {
+          server = "rds";
+        }
+        var url = "/" + server + "?query=" + this.query;
+        axios //executes the query with a promise to get around asynchronous javascript behavior
+          .get(url,{
+            headers: {
+              'Content-Type': 'application/json;charset=UTF-8',
+              'Access-Control-Allow-Origin': '*',
+            }
+          })
+          .then(response => {
+            var resp = response.data; //update table with new data
+            this.time = resp['time'];
+            this.display = true;
+            results.update(resp['fields'], this.resp['items']);
+          }).catch(error => {
+            if(error.response) {
+              console.log("Error: " + error.message);
+            }
+            document.getElementById("submit").disabled = false; //allow queries to start again
+          });
+        document.getElementById("submit").disabled = false; //allow queries to start again
+      }
+    }
+  });
+  var results = new Vue({
+    el: '#results',
+    data: {
+      display: false, //hide or show section
+      items: [],
+      fields: []
+    },
+    methods: {
+      update: function(f,i) {
+        this.fields = f;
+        this.items = i;
+        this.display = true;
+      },
+      clear: function() {
+        this.display = false;
+        this.fields = [];
+        this.items = [];
+      }
+    }
+  });
+</script>
+
+</html>
