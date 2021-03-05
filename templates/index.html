@@ -78,14 +78,14 @@
     <a id="dbhtext">Select database to query:</a><br>
     <select id="tabDrop" onchange='queries.updateIndex()'>
       <option value="0" class="tabOp">Redshift</option>
-      <option value="1" class="tabOp">RDS</option>
+      <option value="1" class="tabOp">MySQL</option>
     </select>
     <br>
     <br>
     <b-form-textarea id="txtarea" v-model="query" rows="3" placeholder="Enter SQL Query"></b-form-textarea>
     <br>
     <button type="submit" value="Submit" id="submit" class="btn btn-outline-dark" v-on:click='performQuery'>Submit</button>
-    <b id="time" v-show="display"> Query Time: {{ time }} ms </b>
+    <b id="time" v-show="display"> [[ time ]] </b>
     <br>
   </div>
   <div id="results" v-show="display">
@@ -98,11 +98,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
 <script>
   var queries = new Vue({ //controls form input
+    delimiters : ['[[',']]'],
     el: '#queries',
     data: {
       index: 0, //0 redshift, 1 rds
       query: "",
-      time: 0,
+      time: "",
       display: false
     },
     methods: {
@@ -115,23 +116,35 @@
         this.display = false;
         var server = "";
         if(this.index == 0) {
-          server = "redshift";
+          server = "/redshift";
         } else {
-          server = "rds";
+          server = "/rds";
         }
-        var url = "/" + server + "?query=" + this.query;
+        //var url = "/" + server + "?query=" + this.query;
         axios //executes the query with a promise to get around asynchronous javascript behavior
-          .get(url,{
+          .get(server,{
+            params: {
+              query: this.query
+            },
             headers: {
               'Content-Type': 'application/json;charset=UTF-8',
               'Access-Control-Allow-Origin': '*',
             }
           })
           .then(response => {
+            console.log(response);
+            console.log(response.data);
             var resp = response.data; //update table with new data
-            this.time = resp['time'];
+            this.time = "Query Time: "+resp['time']+"ms";
             this.display = true;
-            results.update(resp['fields'], this.resp['items']);
+            var items = resp['items'].map(function(arr) { //convert [[]] to [{}]
+              var entry = {};
+              for(var i=0;i<resp['fields'].length;i++) {
+                entry[resp['fields'][i]] = arr[i];
+              }
+              return entry;
+            });
+            results.update(resp['fields'], items);
           }).catch(error => {
             if(error.response) {
               console.log("Error: " + error.message);

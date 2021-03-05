@@ -1,11 +1,12 @@
 import pymysql
 import psycopg2
-from time import time
+import time
 
 
 class connect_redshift():
-    def __init__(self, host="", database='database', user='', password='', port=5439):
-        self.con = psycopg2.connect(host=host, dbname=database, port=port, password=password, user=user)
+    def __init__(self):
+        self.con = psycopg2.connect(dbname= 'dev', host='redshift-cluster-1.c9hlirpegyjx.us-east-2.redshift.amazonaws.com', port= '5439',
+                            user= 'admin101', password= 'Window12')
         self.cur = self.con.cursor()
         return
 
@@ -14,20 +15,21 @@ class connect_redshift():
         self.con.close()
         return
 
-    def perform_query(self, query_statement):
-        start = int(time() * 1000)
-        self.cur.execute(query_statement)
+    def perform_query(self, query):
+        start = int(time.time() * 1000)
+        self.cur.execute(query)
         data = self.cur.description
         items = self.cur.fetchall()
-        time = int(time() * 1000) - start
+        total = int(time.time() * 1000) - start
         fields = []
         for i in range(len(data)):
             fields.append(data[i][0])
-        return fields, items, time
+        return fields, items, total
 
 class connect_rds():
-    def __init__(self, host="", user="", password="", db=""):
-        self.db = pymysql.connect(host, user, password, db)
+    def __init__(self):
+        self.db = pymysql.connect(host='dev.cwhftiwcf2zq.us-east-2.rds.amazonaws.com',  user='admin101',
+                           password='window12', db= 'database' )
         self.cursor = self.db.cursor()
         return
 
@@ -35,13 +37,13 @@ class connect_rds():
         self.db.close()
         return
 
-    def perform_query(self, query_statement):
-        start = int(time() * 1000)
-        self.cursor.execute(query_statement)
+    def perform_query(self, query):
+        start = int(time.time() * 1000)
+        self.cursor.execute(query)
         data = self.cursor.description
         items = self.cursor.fetchall()
-        time = int(time() * 1000) - start
+        total = int(time.time() * 1000) - start
         fields = []
         for i in range(len(data)):
             fields.append(data[i][0])
-        return fields, items, time
+        return fields, items, total
