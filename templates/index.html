@@ -135,7 +135,12 @@
             console.log(response);
             console.log(response.data);
             var resp = response.data; //update table with new data
-            this.time = "Query Time: "+resp['time']+"ms";
+            if(resp['time']<0) {
+              resp['time'] = -resp['time'];
+              this.time = "Query Time: "+resp['time']+"ms. The result was too large to show so rows after 1000 are cut off.";
+            } else {
+              this.time = "Query Time: "+resp['time']+"ms";
+            }
             this.display = true;
             var items = resp['items'].map(function(arr) { //convert [[]] to [{}]
               var entry = {};
@@ -148,6 +153,7 @@
           }).catch(error => {
             if(error.response) {
               console.log("Error: " + error.message);
+              alert("Query failed");
             }
             document.getElementById("submit").disabled = false; //allow queries to start again
           });

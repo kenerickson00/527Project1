@@ -21,6 +21,9 @@ class connect_redshift():
         data = self.cur.description
         items = self.cur.fetchall()
         total = int(time.time() * 1000) - start
+        if len(items) > 1000:
+            items = items[:1000]
+            total = -total
         fields = []
         for i in range(len(data)):
             fields.append(data[i][0])
@@ -28,8 +31,8 @@ class connect_redshift():
 
 class connect_rds():
     def __init__(self):
-        self.db = pymysql.connect(host='dev.cwhftiwcf2zq.us-east-2.rds.amazonaws.com',  user='admin101',
-                           password='window12', db= 'database' )
+        self.db = pymysql.connect(host='database-2.csgrmq8cjzjf.us-east-1.rds.amazonaws.com',  user='admin',
+                           password='CS527Group5', db= 'CS527' )
         self.cursor = self.db.cursor()
         return
 
@@ -43,6 +46,9 @@ class connect_rds():
         data = self.cursor.description
         items = self.cursor.fetchall()
         total = int(time.time() * 1000) - start
+        if len(items) > 1000:
+            items = items[:1000]
+            total = -total
         fields = []
         for i in range(len(data)):
             fields.append(data[i][0])
