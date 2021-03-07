@@ -5,8 +5,10 @@ import time
 
 class connect_redshift():
     def __init__(self):
-        self.con = psycopg2.connect(dbname= 'dev', host='redshift-cluster-1.c9hlirpegyjx.us-east-2.redshift.amazonaws.com', port= '5439',
-                            user= 'admin101', password= 'Window12')
+        #self.con = psycopg2.connect(dbname= 'dev', host='redshift-cluster-1.c9hlirpegyjx.us-east-2.redshift.amazonaws.com', port= '5439',
+        #                    user= 'admin101', password= 'Window12')
+        self.con = psycopg2.connect(dbname= 'dev', host='redshift-cluster-1.cxhpbk96dqyo.us-east-1.redshift.amazonaws.com', port= '5439',
+                            user= 'awsuser', password= 'CS527Group5')
         self.cur = self.con.cursor()
         return
 
