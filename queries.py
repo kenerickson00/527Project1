@@ -14,7 +14,7 @@ def query_redshift():
 
 @app.route('/rds')
 def query_rds():
-    query = request.args.get('query')+"_csv"
+    query = request.args.get('query')
     connection = connect_rds()
     fields, items, time = connection.perform_query(query)
     result = {'fields': fields, 'items': items, 'time': time}
