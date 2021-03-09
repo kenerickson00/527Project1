@@ -21,10 +21,10 @@ class connect_redshift():
         start = int(time.time() * 1000)
         self.cur.execute(query)
         data = self.cur.description
-        items = self.cur.fetchall()
+        #items = self.cur.fetchall()
+        items  = self.cur.fetchmany(1000)
         total = int(time.time() * 1000) - start
-        if len(items) > 1000:
-            items = items[:1000]
+        if len(items) == 1000:
             total = -total
         fields = []
         for i in range(len(data)):
@@ -46,10 +46,10 @@ class connect_rds():
         start = int(time.time() * 1000)
         self.cursor.execute(query)
         data = self.cursor.description
-        items = self.cursor.fetchall()
+        #items = self.cursor.fetchall()
+        items  = self.cursor.fetchmany(1000)
         total = int(time.time() * 1000) - start
-        if len(items) > 1000:
-            items = items[:1000]
+        if len(items) == 1000:
             total = -total
         fields = []
         for i in range(len(data)):

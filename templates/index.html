@@ -153,7 +153,7 @@
           }).catch(error => {
             if(error.response) {
               console.log("Error: " + error.message);
-              alert("Query failed");
+              alert("Query failed. Large queries may fail due to memory constraints on the server.");
             }
             document.getElementById("submit").disabled = false; //allow queries to start again
           });
