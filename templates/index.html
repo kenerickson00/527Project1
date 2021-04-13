@@ -148,10 +148,16 @@
             var items = resp['items'].map(function(arr) { //convert [[]] to [{}]
               var entry = {};
               for(var i=0;i<resp['fields'].length;i++) {
-                entry[resp['fields'][i]] = arr[i];
+                if(resp['fields'][i] != "_id") { //remove default mongodb _id field elements
+                  entry[resp['fields'][i]] = arr[i];
+                }
               }
               return entry;
             });
+            if(resp['fields'].includes("_id")) { //remove _id from the headers
+              var ind = resp['fields'].indexOf("_id");
+              resp['fields'].splice(ind,1);
+            }
             results.update(resp['fields'], items);
           }).catch(error => {
             if(error.response) {

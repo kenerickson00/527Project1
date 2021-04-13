@@ -123,6 +123,7 @@ class connect_drill():
 
     def perform_query(self, query):
         start = int(time.time() * 1000)
+        #return "test"
         curs = self.curs.execute(query)
         #data = self.curs.description
         items = curs.fetchmany(1000) #items is a pandas dataframe

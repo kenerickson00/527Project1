@@ -25,6 +25,7 @@ def query_rds():
 def query_mongodb():
     query = request.args.get('query')
     connection = connect_drill()
+    #return connection.perform_query(query)
     fields, items, time = connection.perform_query(query)
     result = {'fields': fields, 'items': items, 'time': time}
     connection.close()
