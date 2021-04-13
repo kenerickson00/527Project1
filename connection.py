@@ -1,5 +1,7 @@
 import pymysql
 import psycopg2
+from pymongo import MongoClient
+from pydrill.client import PyDrill
 import time
 
 
@@ -54,6 +56,67 @@ class connect_rds():
         items  = self.cursor.fetchmany(1000)
         total = int(time.time() * 1000) - start
         if len(items) == 1000:
+            total = -total
+        fields = []
+        if data is not None:
+            for i in range(len(data)):
+                fields.append(data[i][0])
+        return fields, items, total
+
+class connect_mongo():
+    def __init__(self):
+        self.client = MongoClient(host='') #, port=''
+        self.db = self.client['instacart']
+        return
+
+    def close(self):
+        self.client.close()
+        return
+
+    def perform_query(self, query): #query in mysql format
+
+        return
+
+    def convert_query(self, query):
+        lower = query.lower()
+        if not lower.find("select") == -1:
+            ind = lower.find("select")
+            if not ind == 0: #special case
+                return #do something here
+            else: #normal select query, select {cols} from {table} {condtions}
+                #db.{table}.find({conditions})
+                q = query[7:] #remove "select "
+                f = lower.find("from") #remember spaces before and after from
+                columns = q[:f-1] #leave off space
+                if columns is "*":
+                    columns = ""
+                rest = query[f+5:] #table + conditions
+                table = rest #will get changed if any conditions exist
+                temp = rest.lower()
+                conditions = None
+                if not temp.find("where") == -1:
+                    return
+                if not temp.find("limit") == -1:
+                    return
+                if not temp.find("skip") == -1:
+                    return
+                #perform query
+                collection = self.db[table]
+                if conditions is None:
+                    return collection.find()
+                else:
+                    return collection.find(conditions)
+
+class connect_drill():
+    def __init__(self):
+        self.db = PyDrill(host='3.141.153.121', port=8047)
+        return
+
+    def perform_query(self, query):
+        start = int(time.time() * 1000)
+        data = self.db.query(query)
+        total = int(time.time() * 1000) - start
+        if len(data) == 1000:
             total = -total
         fields = []
         if data is not None:

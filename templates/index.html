@@ -79,6 +79,7 @@
     <select id="tabDrop" onchange='queries.updateIndex()'>
       <option value="0" class="tabOp">Redshift</option>
       <option value="1" class="tabOp">MySQL</option>
+      <option value="2" class="tabOP">MongoDB</option>
     </select>
     <br>
     <br>
@@ -117,8 +118,10 @@
         var server = "";
         if(this.index == 0) {
           server = "/redshift";
-        } else {
+        } else if(this.index == 1) {
           server = "/rds";
+        } else {
+          server = "/mongodb";
         }
         //var url = "/" + server + "?query=" + this.query;
         axios //executes the query with a promise to get around asynchronous javascript behavior

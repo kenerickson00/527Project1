@@ -21,6 +21,15 @@ def query_rds():
     connection.close()
     return result
 
+@app.route('/mongodb')
+def query_mongodb():
+    query = request.args.get('query')
+    connection = connect_drill()
+    fields, items, time = connection.perform_query(query)
+    result = {'fields': fields, 'items': items, 'time': time}
+    #connection.close()
+    return result
+
 @app.route('/')
 def index():
     return render_template('index.html')
