@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template
-from connection import connect_rds, connect_redshift
+from connection import connect_rds, connect_redshift, connect_drill
 
 app = Flask(__name__)
 
@@ -27,7 +27,7 @@ def query_mongodb():
     connection = connect_drill()
     fields, items, time = connection.perform_query(query)
     result = {'fields': fields, 'items': items, 'time': time}
-    #connection.close()
+    connection.close()
     return result
 
 @app.route('/')

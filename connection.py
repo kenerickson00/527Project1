@@ -2,6 +2,8 @@ import pymysql
 import psycopg2
 from pymongo import MongoClient
 from pydrill.client import PyDrill
+from drillpy import connect
+import pandas
 import time
 
 
@@ -109,17 +111,27 @@ class connect_mongo():
 
 class connect_drill():
     def __init__(self):
-        self.db = PyDrill(host='3.141.153.121', port=8047)
+        self.conn = connect(host='3.141.153.121',db='mongo.data', port=8047)
+        self.curs = self.conn.cursor()
+        return
+
+    def close(self):
+        self.conn.commit()
+        self.curs.close()
+        self.conn.close()
         return
 
     def perform_query(self, query):
         start = int(time.time() * 1000)
-        data = self.db.query(query)
+        curs = self.curs.execute(query)
+        #data = self.curs.description
+        items = curs.fetchmany(1000) #items is a pandas dataframe
         total = int(time.time() * 1000) - start
-        if len(data) == 1000:
+        if len(items.index) == 1000:
             total = -total
         fields = []
-        if data is not None:
-            for i in range(len(data)):
-                fields.append(data[i][0])
-        return fields, items, total
+        if not items.empty:
+            for i in items.columns:
+                fields.append(i)
+        vals = items.values.tolist()
+        return fields, vals, total
