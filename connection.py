@@ -111,7 +111,7 @@ class connect_mongo():
 
 class connect_drill():
     def __init__(self):
-        self.conn = connect(host='3.141.153.121',db='mongo.data', port=8047)
+        self.conn = connect(host='52.54.173.197',db='mongo.CS527', port=8047)# connect(host='3.141.153.121',db='mongo.data', port=8047)
         self.curs = self.conn.cursor()
         return
 
