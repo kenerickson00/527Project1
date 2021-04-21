@@ -1,19 +1,18 @@
-Commands for creating the MyCube table, since select into does not work in mysql. The first block creates the table.
-the second populates it with the proper data.
+Command for creating the MyCube table, including the ThisQuarter column.
 
-CREATE TABLE MyCube (
-ThisYear VARCHAR(7) NULL,
-ThisQuarter VARCHAR(7) NULL,
-Region VARCHAR(11) NULL,
-Product VARCHAR(32) NULL,
-Sales INTEGER NULL)
-
-Insert into MyCube (ThisYear, ThisQuarter, Region,
-Product,Sales )
-select year(OrderDate), concat('Q',quarter(OrderDate)), Order_ShipCountry,
-ProductName,Order_Amount
-from ABC_Retail_Fact_Table
-where Order_ShipCountry in ('USA','Canada','UK') and ProductName in ('Chai','Tofu','Chocolade')
+select
+    Date_Part(year,OrderDate) as ThisYear
+    ,concat('Q',Date_Part(quarter,OrderDate)) as ThisQuarter
+    ,[Order_ShipCountry] as Region
+    ,[ProductName] as Product
+    ,[Order_Amount] as Sales
+into
+    MyCube
+from
+    ABC_Retail_Fact_Table
+where
+    [Order_ShipCountry] in ('USA','Canada','UK')
+    and [ProductName] in ('Chai','Tofu','Chocolade')
 
 
 Below are the pivot commands. First is the original, below it a command that does the same thing, but works
