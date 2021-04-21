@@ -21,19 +21,19 @@ Below are the updated olap commands that work on our server.
 select * from MyCube order by 1,2,3
 
 -- pivot 1
-select case when 1=1 then 'Sales' end as Product, sum(case when ThisQuarter='Q1' then Sales else 0 end) as Q1,
+select Product, sum(case when ThisQuarter='Q1' then Sales else 0 end) as Q1,
 sum(case when ThisQuarter='Q2' then Sales else 0 end) as Q2, sum(case when ThisQuarter='Q3' then Sales else 0 end)
-as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube
+as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube Group By Product
 
 -- pivot 2
-select case when 1=1 then 'Sales' end as Region, sum(case when ThisQuarter='Q1' then Sales else 0 end) as Q1,
+select Region, sum(case when ThisQuarter='Q1' then Sales else 0 end) as Q1,
 sum(case when ThisQuarter='Q2' then Sales else 0 end) as Q2, sum(case when ThisQuarter='Q3' then Sales else 0 end)
-as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube
+as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube Group By Region
 
 -- pivot 3
-select case when 1=1 then 'Sales' end as Product, case when 1=1 then 'Sales' end as Region, sum(case when ThisQuarter='Q1' then Sales else 0 end) as Q1,
+select Product, Region, sum(case when ThisQuarter='Q1' then Sales else 0 end) as Q1,
 sum(case when ThisQuarter='Q2' then Sales else 0 end) as Q2, sum(case when ThisQuarter='Q3' then Sales else 0 end)
-as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube
+as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube Group By Product, Region
 
 -- slicing
 select * from MyCube where ThisQuarter='Q1'
@@ -42,43 +42,56 @@ select * from MyCube where ThisQuarter='Q1'
 select * from MyCube where ThisQuarter='Q1' and region='Europe'
 
 -- group by with rollup
-SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, GROUPING(ThisQuarter) AS 'Grouping'
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales
 FROM MyCube
-GROUP BY ThisQuarter, Region, Product with rollup
-ORDER BY 1,2,3
-
-SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
-FROM MyCube
-GROUP BY ThisQuarter
+GROUP BY 1,2,3
 UNION
-SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales
 FROM MyCube
-GROUP BY Region
+GROUP BY 2,1,3
 UNION
-SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales
 FROM MyCube
-GROUP BY Product
+GROUP BY 3,1,2
 UNION
+SELECT ThisQuarter, cast(NULL as VARCHAR) as Region, cast(NULL as VARCHAR) as Product, SUM(Sales) as TotalSales
+FROM MyCube
+GROUP BY 1,2,3
+UNION
+SELECT cast(NULL as VARCHAR) as ThisQuarter, cast(NULL as VARCHAR) as Region, cast(NULL as VARCHAR) as Product, SUM(Sales) as TotalSales
+FROM MyCube
+GROUP BY 1,2,3
 ORDER BY 1,2,3
 
 -- group by with cube
-SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, GROUPING(ThisQuarter) AS 'Grouping'
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales
 FROM MyCube
-GROUP BY ThisQuarter, Region, Product with cube
-ORDER BY 1,2,3
-
-SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
-FROM MyCube
-GROUP BY ThisQuarter, Region
+GROUP BY 1,2,3
 UNION
-SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales
 FROM MyCube
-GROUP BY ThisQuarter, Product
-Union
-SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+GROUP BY 2,1,3
+UNION
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales
 FROM MyCube
-GROUP BY Product, Region
-Order By 1,2,3
+GROUP BY 3,1,2
+UNION
+SELECT ThisQuarter, cast(NULL as VARCHAR) as Region, cast(NULL as VARCHAR) as Product, SUM(Sales) as TotalSales
+FROM MyCube
+GROUP BY 1,2,3
+UNION
+SELECT cast(NULL as VARCHAR) as ThisQuarter, Region, cast(NULL as VARCHAR) as Product, SUM(Sales) as TotalSales
+FROM MyCube
+GROUP BY 2,1,3
+UNION
+SELECT cast(NULL as VARCHAR) as ThisQuarter, cast(NULL as VARCHAR) as Region, Product, SUM(Sales) as TotalSales
+FROM MyCube
+GROUP BY 3,1,2
+UNION
+SELECT cast(NULL as VARCHAR) as ThisQuarter, cast(NULL as VARCHAR) as Region, cast(NULL as VARCHAR) as Product, SUM(Sales) as TotalSales
+FROM MyCube
+GROUP BY 1,2,3
+ORDER BY 1,2,3
 
 -- group by grouping sets
 SELECT ThisQuarter, NULL as Region, SUM(Sales) as TotalSales FROM MyCube GROUP BY ThisQuarter
