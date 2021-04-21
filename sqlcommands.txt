@@ -67,6 +67,19 @@ FROM MyCube
 GROUP BY ThisQuarter, Region, Product with cube
 ORDER BY 1,2,3
 
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+FROM MyCube
+GROUP BY ThisQuarter, Region
+UNION
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+FROM MyCube
+GROUP BY ThisQuarter, Product
+Union
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+FROM MyCube
+GROUP BY Product, Region
+Order By 1,2,3
+
 -- group by grouping sets
 SELECT ThisQuarter, NULL as Region, SUM(Sales) as TotalSales FROM MyCube GROUP BY ThisQuarter
 UNION ALL
