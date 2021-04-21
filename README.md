@@ -1,5 +1,5 @@
 "# 527Project1"
-To run the app go to address http://3.141.153.121/
+To run the app go to address http://3.137.143.201/
 
 This app allows users to perform SQL queries on either a
 MySQL RDS or redshift database.
