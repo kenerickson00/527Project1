@@ -15,30 +15,88 @@ where
     and [ProductName] in ('Chai','Tofu','Chocolade')
 
 
-Below are the pivot commands. First is the original, below it a command that does the same thing, but works
-on mysql servers.
+Below are the updated olap commands that work on our server.
 
-select Product, Q1, Q2, Q3, Q4
-from MyCube PIVOT(SUM(Sales) FOR ThisQuarter IN (Q1,Q2,Q3,Q4)) AS P
+-- table
+select * from MyCube order by 1,2,3
 
+-- pivot 1
 select case when 1=1 then 'Sales' end as Product, sum(case when ThisQuarter='Q1' then Sales else 0 end) as Q1,
 sum(case when ThisQuarter='Q2' then Sales else 0 end) as Q2, sum(case when ThisQuarter='Q3' then Sales else 0 end)
 as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube
 
-
-select Region, Q1, Q2, Q3, Q4
-from MyCube PIVOT(SUM(Sales) FOR ThisQuarter IN (Q1,Q2,Q3,Q4)) AS P
-
+-- pivot 2
 select case when 1=1 then 'Sales' end as Region, sum(case when ThisQuarter='Q1' then Sales else 0 end) as Q1,
 sum(case when ThisQuarter='Q2' then Sales else 0 end) as Q2, sum(case when ThisQuarter='Q3' then Sales else 0 end)
 as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube
 
-
-
-SELECT Product, Region, Q1, Q2, Q3, Q4
-FROM (SELECT Product, Region, ThisQuarter, Sales FROM MyCube) AS p
-PIVOT (sum(Sales) FOR ThisQuarter IN (Q1,Q2,Q3,Q4)) AS pvt
-
+-- pivot 3
 select case when 1=1 then 'Sales' end as Product, case when 1=1 then 'Sales' end as Region, sum(case when ThisQuarter='Q1' then Sales else 0 end) as Q1,
 sum(case when ThisQuarter='Q2' then Sales else 0 end) as Q2, sum(case when ThisQuarter='Q3' then Sales else 0 end)
 as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube
+
+-- slicing
+select * from MyCube where ThisQuarter='Q1'
+
+-- dicing
+select * from MyCube where ThisQuarter='Q1' and region='Europe'
+
+-- group by with rollup
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, GROUPING(ThisQuarter) AS 'Grouping'
+FROM MyCube
+GROUP BY ThisQuarter, Region, Product with rollup
+ORDER BY 1,2,3
+
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+FROM MyCube
+GROUP BY ThisQuarter
+UNION
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+FROM MyCube
+GROUP BY Region
+UNION
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, cast(NULL as INT) AS ThisQuarter AS 'Grouping'
+FROM MyCube
+GROUP BY Product
+UNION
+ORDER BY 1,2,3
+
+-- group by with cube
+SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales--, GROUPING(ThisQuarter) AS 'Grouping'
+FROM MyCube
+GROUP BY ThisQuarter, Region, Product with cube
+ORDER BY 1,2,3
+
+-- group by grouping sets
+SELECT ThisQuarter, NULL as Region, SUM(Sales) as TotalSales FROM MyCube GROUP BY ThisQuarter
+UNION ALL
+SELECT NULL, Region, SUM(Sales) as TotalSales FROM MyCube GROUP BY Region
+ORDER BY 1,2
+
+-- Ranking
+SELECT
+	Product, Sales
+	, RANK() OVER (ORDER BY Sales ASC) as RANK_SALES
+	, DENSE_RANK() OVER (ORDER BY Sales ASC) as DENSE_RANK_SALES
+	, PERCENT_RANK() OVER (ORDER BY Sales ASC) as PERC_RANK_SALES
+	, CUME_DIST() OVER (ORDER BY Sales ASC) as CUM_DIST_SALES
+FROM
+	MyCube
+ORDER BY
+	RANK_SALES ASC
+
+-- Windowing 1
+SELECT ThisQuarter, Region, Sales,
+AVG(Sales) OVER (PARTITION BY Region ORDER BY ThisQuarter ROWS BETWEEN 0 PRECEDING AND 0 FOLLOWING) AS Sales_Avg
+FROM
+	MyCube
+ORDER BY
+	Region, ThisQuarter, Sales_Avg
+
+-- Windowing 2
+SELECT ThisQuarter, Region, Sales,
+AVG(Sales) OVER (PARTITION BY Region ORDER BY ThisQuarter ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) AS Sales_Avg
+FROM
+	MyCube
+ORDER BY
+	Region, ThisQuarter, Sales_Avg
