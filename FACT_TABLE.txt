@@ -1,0 +1,83 @@
+
+/* Created Fact Table Version1 */
+Select * into Big_Fact_Table
+FROM abc_retail_fact_table
+
+select * from Big_Fact_Table limit 10
+
+/* Dimension Order */
+select ﻿OrderID, OrderDate,Order_ShippedDate, Order_Freight,
+Order_ShipCity, Order_ShipCountry, Order_UnitPrice, Order_Quantity, Order_Amount
+into Order_FT from Big_Fact_Table 
+
+select "﻿orderid" from Order_FT limit 10
+
+/* Dimension Product */
+create table Product_FT (ProductID int IDENTITY(1,1), ProductName varchar(500), primary key(ProductID));
+
+---select count(distinct ProductName) from Fact_table
+insert into Product_FT(ProductName)
+select distinct ProductName from Big_Fact_Table;
+
+ALTER TABLE Big_Fact_Table add ProductID INT
+
+Update Big_Fact_Table
+set ProductID = Product_FT.ProductID
+from Product_FT
+where  Big_Fact_Table.ProductName = Product_FT.ProductName 
+
+/* Dimension Company*/
+create table Company_FT (CompanyID int IDENTITY(1,1), CompanyName varchar(500), primary key(CompanyID));
+
+---select count(distinct ProductName) from Fact_table
+insert into Company_FT (CompanyName)
+select distinct CompanyName from Big_Fact_Table;
+
+ALTER TABLE Big_Fact_Table add CompanyID  INT
+
+Update Big_Fact_Table
+set CompanyID = Company_FT.CompanyID
+from Company_FT
+where  Big_Fact_Table.CompanyName = Company_FT.CompanyName 
+
+select * from Big_Fact_Table limit 10
+
+
+/* Dimension Company*/
+create table Employee_FT(EmployeeID int IDENTITY(1,1), employee_lastname varchar(500), 
+employee_firstname varchar(500), employee_title VARCHAR(500), primary key(EmployeeID ));
+
+---select count(distinct ProductName) from Big_Fact_Table
+insert into Employee_FT(employee_lastname, employee_firstname, employee_title)
+select distinct employee_lastname, employee_firstname, employee_title from Big_Fact_Table;
+
+ALTER TABLE Big_Fact_Table add EmployeeID INT
+
+Update Big_Fact_Table
+set EmployeeID = Employee_FT.EmployeeID
+from Employee_FT
+where  Big_Fact_Table.employee_lastname = Employee_FT.employee_lastname and Big_Fact_Table.employee_title  = Employee_FT.employee_title 
+and Big_Fact_Table.employee_firstname = Big_Fact_Table.employee_firstname
+
+/* Dimension Customer*/
+create table Customer_FT(CustomerID int IDENTITY(1,1), customer_contactname varchar(500), 
+customer_city varchar(500), customer_country VARCHAR(500), customer_phone VARCHAR(500), primary key(CustomerID ));
+
+---select count(distinct ProductName) from Big_Fact_Table
+insert into Customer_FT(customer_contactname , customer_city, customer_country, customer_phone)
+select distinct customer_contactname , customer_city, customer_country, customer_phone from Big_Fact_Table;
+
+ALTER TABLE Big_Fact_Table add CustomerID INT
+
+Update Big_Fact_Table
+set CustomerID = Customer_FT.CustomerID
+from Customer_FT
+where Big_Fact_Table.customer_contactname = Customer_FT.customer_contactname AND 
+Big_Fact_Table.customer_city = Customer_FT.customer_city and 
+Big_Fact_Table.customer_country =Customer_FT.customer_country and 
+Big_Fact_Table.customer_phone = Customer_FT.customer_phone
+
+/* Created Final Fact Table */
+select OrderId, CustomerID, employeeid, Productid, companyid 
+into Fact_Table
+from Big_Fact_Table
