@@ -5,6 +5,7 @@ from pydrill.client import PyDrill
 from drillpy import connect
 import pandas
 import time
+import pyodbc
 
 
 class connect_redshift():
@@ -43,6 +44,7 @@ class connect_rds():
     def __init__(self):
         self.db = pymysql.connect(host='database-2.csgrmq8cjzjf.us-east-1.rds.amazonaws.com',  user='admin',
                            password='CS527Group5', db= 'CS527' )
+        #self.db = pyodbc.connect('DRIVER={Devart ODBC Driver for MySQL};User ID=admin;Password=CS527Group5;Server=database-2.csgrmq8cjzjf.us-east-1.rds.amazonaws.com;Database=CS527;')
         self.db.autocommit(True)
         self.cursor = self.db.cursor()
         return
@@ -136,3 +138,29 @@ class connect_drill():
                 fields.append(i)
         vals = items.values.tolist()
         return fields, vals, total
+
+class connect_mongo2():
+    def __init__(self): #should work? need to fill in proper credentials tho, also need to start odbc driver on ec2
+        self.conn = pyodbc.connect('DRIVER={Devart ODBC Driver for MongoDB};Server=myserver;Port=myport;Database=mydatabase;User ID=myuserid;Password=myuserpassword')
+        self.conn.autocommit = True
+        self.curs = self.conn.cursor()
+        return
+
+    def close(self):
+        self.curs.close()
+        self.conn.close()
+        return
+
+    def perform_query(self, query):
+        start = int(time.time() * 1000)
+        self.curs.execute(query)
+        data = self.curs.description
+        items  = self.curs.fetchmany(1000)
+        total = int(time.time() * 1000) - start
+        if len(items) == 1000:
+            total = -total
+        fields = []
+        if data is not None:
+            for i in range(len(data)):
+                fields.append(data[i][0])
+        return fields, items, total
