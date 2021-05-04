@@ -39,7 +39,7 @@ as Q3, sum(case when ThisQuarter='Q4' then Sales else 0 end) as Q4 from MyCube G
 select * from MyCube where ThisQuarter='Q1'
 
 -- dicing
-select * from MyCube where ThisQuarter='Q1' and region='Europe'
+select * from MyCube where ThisQuarter='Q1' and region='UK'
 
 -- group by with rollup
 SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales, 0 AS Grouping
@@ -53,11 +53,15 @@ UNION
 SELECT ThisQuarter, Region, Product, SUM(Sales) as TotalSales, 0 AS Grouping
 FROM MyCube
 GROUP BY 3,1,2
-UNION
+Union
 SELECT ThisQuarter, cast(NULL as VARCHAR) as Region, cast(NULL as VARCHAR) as Product, SUM(Sales) as TotalSales, 0 AS Grouping
 FROM MyCube
 GROUP BY 1,2,3
-UNION
+Union
+SELECT ThisQuarter, Region, cast(NULL as VARCHAR) as Product, SUM(Sales) as TotalSales, 0 AS Grouping
+FROM MyCube
+GROUP BY 1,2,3
+Union
 SELECT cast(NULL as VARCHAR) as ThisQuarter, cast(NULL as VARCHAR) as Region, cast(NULL as VARCHAR) as Product, SUM(Sales) as TotalSales, 1 AS Grouping
 FROM MyCube
 GROUP BY 1,2,3
