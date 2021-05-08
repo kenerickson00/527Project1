@@ -145,15 +145,14 @@
               this.time = "Query Time: "+resp['time']+"ms";
             }
             this.display = true;
-            var fs = {};
+            var j = 0;
             for(var i=0;i<resp['fields'].length;i++) {
-              var nn = resp['fields'][i];
-              var j = 1;
-              while(nn in fs) {
-                nn = resp['fields'][i] + "" + j + "";
+              if(resp['fields'][i] === "_id") {
+                if(j>0) {
+                  resp['fields'][i] = resp['fields'][i] + "" + j + "";
+                }
                 j++;
               }
-              resp['fields'][i] = nn;
             }
             var items = resp['items'].map(function(arr) { //convert [[]] to [{}]
               var entry = {};
