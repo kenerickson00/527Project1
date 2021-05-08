@@ -145,17 +145,20 @@
               this.time = "Query Time: "+resp['time']+"ms";
             }
             this.display = true;
+            var fs = {};
+            for(var i=0;i<resp['fields'].length;i++) {
+              var nn = resp['fields'][i];
+              var j = 1;
+              while(nn in fs) {
+                nn = resp['fields'][i] + "" + j + "";
+                j++;
+              }
+              resp['fields'][i] = nn;
+            }
             var items = resp['items'].map(function(arr) { //convert [[]] to [{}]
               var entry = {};
               for(var i=0;i<resp['fields'].length;i++) {
                 //if(resp['fields'][i] != "_id") { //remove default mongodb _id field elements
-                var nn = resp['fields'][i];
-                var j = 1;
-                while(nn in entry) {
-                  nn = resp['fields'][i] + "" + j + "";
-                  j++;
-                }
-                resp['fields'][i] = nn;
                 entry[resp['fields'][i]] = arr[i];
                 //}
               }
