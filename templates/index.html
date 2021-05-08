@@ -149,7 +149,7 @@
               var entry = {};
               for(var i=0;i<resp['fields'].length;i++) {
                 //if(resp['fields'][i] != "_id") { //remove default mongodb _id field elements
-                if resp['fields'][i] in entry {
+                if(resp['fields'][i] in entry) {
                   resp['fields'][i] = resp['fields'][i] + "1";
                 }
                 entry[resp['fields'][i]] = arr[i];
