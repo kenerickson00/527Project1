@@ -146,6 +146,7 @@
             }
             this.display = true;
             var fields = [];
+            var j = 0;
             for(var i=0;i<resp['fields'].length;i++) {
               if(resp['fields'][i].incldues("_id") && resp['fields'][i].length == 3) {
                 if(j==0) {
