@@ -145,29 +145,11 @@
               this.time = "Query Time: "+resp['time']+"ms";
             }
             this.display = true;
-            var fields = [];
-            var j = 0;
-            for(var i=0;i<resp['fields'].length;i++) {
-              if(resp['fields'][i].includes("_id") && resp['fields'][i].length == 3) {
-                if(j==0) {
-                  fields.push("_id");
-                } else if(j==1) {
-                  fields.push("_id1");
-                } else if(j==2) {
-                  fields.push("_id2");
-                } else { //how many tables are you really gonna join
-                  fields.push("_id3");
-                }
-                j++;
-              } else {
-                fields.push(resp['fields'][i]);
-              }
-            }
             var items = resp['items'].map(function(arr) { //convert [[]] to [{}]
               var entry = {};
-              for(var i=0;i<fields.length;i++) {
+              for(var i=0;i<resp['fields'].length;i++) {
                 //if(resp['fields'][i] != "_id") { //remove default mongodb _id field elements
-                entry[fields[i]] = arr[i];
+                entry[resp['fields'][i]] = arr[i];
                 //}
               }
               return entry;
@@ -176,7 +158,7 @@
             //  var ind = resp['fields'].indexOf("_id");
             //  resp['fields'].splice(ind,1);
             //}
-            results.update(fields, items);
+            results.update(resp['fields'], items);
           }).catch(error => {
             if(error.response) {
               console.log("Error: " + error.message);
