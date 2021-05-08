@@ -149,9 +149,13 @@
               var entry = {};
               for(var i=0;i<resp['fields'].length;i++) {
                 //if(resp['fields'][i] != "_id") { //remove default mongodb _id field elements
-                if(resp['fields'][i] in entry) {
-                  resp['fields'][i] = resp['fields'][i] + "1";
+                var nn = resp['fields'][i];
+                var j = 1;
+                while(nn in entry) {
+                  nn = resp['fields'][i] + "" + j + "";
+                  j++;
                 }
+                resp['fields'][i] = nn;
                 entry[resp['fields'][i]] = arr[i];
                 //}
               }
