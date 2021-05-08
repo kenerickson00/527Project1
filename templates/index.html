@@ -148,8 +148,14 @@
             var j = 0;
             for(var i=0;i<resp['fields'].length;i++) {
               if(resp['fields'][i] === "_id") {
-                if(j>0) {
-                  resp['fields'][i] = resp['fields'][i] + "" + j + "";
+                if(j==0) {
+                  //do nothing
+                } else if(j==1) {
+                  resp['fields'][i] = "_id1";
+                } else if(j==2) {
+                  resp['fields'][i] = "_id2";
+                } else { //how many tables are you really gonna join
+                  resp['fields'][i] = "_id3";
                 }
                 j++;
               }
